@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import Task from '../components/Task';
+import {testProps} from '../helpers/testProps';
 
 const TodaysTasks = () => {
   const [task, setTask] = useState<string>('');
@@ -30,7 +31,9 @@ const TodaysTasks = () => {
   return (
     <View style={styles.container}>
       <View style={styles.tasksWrapper}>
-        <Text style={styles.sectionTitle}>Today's tasks</Text>
+        <Text style={styles.sectionTitle} {...testProps('title')}>
+          Today's tasks
+        </Text>
         <View style={styles.items}>
           {tasks.map((item, index) => (
             <TouchableOpacity key={index} onPress={() => completeTask(index)}>

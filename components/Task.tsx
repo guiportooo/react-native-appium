@@ -1,15 +1,19 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
+import {testProps} from '../helpers/testProps';
 
 type Props = {
+  number: number;
   text: string;
 };
 
-const Task = ({text}: Props) => (
+const Task = ({number, text}: Props) => (
   <View style={styles.item}>
     <View style={styles.itemsLeft}>
       <View style={styles.square} />
-      <Text style={styles.itemText}>{text}</Text>
+      <Text style={styles.itemText} {...testProps(`text_${number}`)}>
+        {text}
+      </Text>
     </View>
     <View style={styles.circular} />
   </View>

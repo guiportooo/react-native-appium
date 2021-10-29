@@ -36,8 +36,11 @@ const TodaysTasks = () => {
         </Text>
         <View style={styles.items}>
           {tasks.map((item, index) => (
-            <TouchableOpacity key={index} onPress={() => completeTask(index)}>
-              <Task text={item} />
+            <TouchableOpacity
+              key={index}
+              {...testProps(`task_${index}`)}
+              onPress={() => completeTask(index)}>
+              <Task number={index + 1} text={item} />
             </TouchableOpacity>
           ))}
         </View>
@@ -49,9 +52,10 @@ const TodaysTasks = () => {
           style={styles.input}
           placeholder={'Write a task'}
           value={task}
+          {...testProps('input')}
           onChangeText={text => setTask(text)}
         />
-        <TouchableOpacity onPress={handleAddTask}>
+        <TouchableOpacity {...testProps('button')} onPress={handleAddTask}>
           <View style={styles.addWrapper}>
             <Text style={styles.addText}>+</Text>
           </View>

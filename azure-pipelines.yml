@@ -1,0 +1,78 @@
+trigger:
+- none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Cache@2
+  inputs:
+    key: 'AVD_IMAGES_29'
+    path: '$(ANDROID_HOME)/system-images'
+    cacheHitVar: 'AVD_IMAGES_RESTORED'
+  continueOnError: true
+  condition: succeededOrFailed()
+  displayName: 'Caching System Images for AVD'
+
+- script: |
+    echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install "system-images;android-29;google_apis;x86"
+    echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd --force --name emu --device "Nexus 5X" -k 'system-images;android-29;google_apis;x86'
+    $ANDROID_HOME/emulator/emulator -list-avds
+  condition: ne(variables.AVD_IMAGES_RESTORED, 'true')
+  displayName: 'Download Android Emulator Image'
+
+- task: Yarn@3
+  displayName: 'Instala os pacotes'
+  inputs:
+    arguments: 'install'
+
+- task: Gradle@2
+  displayName: 'Roda Android clean'
+  inputs:
+    gradleWrapperFile: 'android/gradlew'
+    workingDirectory: 'android'
+    tasks: 'clean'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+
+- task: Gradle@2
+  displayName: 'Roda Android clean build cache'
+  inputs:
+    gradleWrapperFile: 'android/gradlew'
+    workingDirectory: 'android'
+    tasks: 'cleanBuildCache'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+
+- task: Gradle@2
+  displayName: 'Roda Android assemble'
+  inputs:
+    gradleWrapperFile: 'android/gradlew'
+    workingDirectory: 'android'
+    options: '-PversionName=1.0 -PversionCode=$(Build.BuildId)'
+    tasks: 'assembleRelease'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+
+- script: |
+    echo "Starting emulator"
+    nohup $ANDROID_HOME/emulator/emulator -avd emu -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 &
+    $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+    $ANDROID_HOME/platform-tools/adb devices
+    echo "Emulator started"
+  displayName: 'Android Emulator'
+
+- script: |
+    node -v
+    npm install -g appium
+    appium -v
+  displayName: "Install Appium"
+  
+- script: appium
+  displayName: "Run Appium"
+
+- script: yarn run e2e
+  displayName: 'Appium test'

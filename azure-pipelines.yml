@@ -21,10 +21,8 @@ steps:
   condition: ne(variables.AVD_IMAGES_RESTORED, 'true')
   displayName: 'Download Android Emulator Image'
 
-- task: Yarn@3
-  displayName: 'Instala os pacotes'
-  inputs:
-    arguments: 'install'
+- script: yarn install
+  displayName: 'Install packages'
 
 - task: Gradle@2
   displayName: 'Roda Android clean'
@@ -37,7 +35,7 @@ steps:
     sonarQubeRunAnalysis: false
 
 - task: Gradle@2
-  displayName: 'Roda Android clean build cache'
+  displayName: 'Run Android clean build cache'
   inputs:
     gradleWrapperFile: 'android/gradlew'
     workingDirectory: 'android'
@@ -47,7 +45,7 @@ steps:
     sonarQubeRunAnalysis: false
 
 - task: Gradle@2
-  displayName: 'Roda Android assemble'
+  displayName: 'Run Android assemble'
   inputs:
     gradleWrapperFile: 'android/gradlew'
     workingDirectory: 'android'

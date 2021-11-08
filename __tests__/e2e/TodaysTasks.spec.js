@@ -15,15 +15,17 @@ const driver = wd.promiseChainRemote('localhost', PORT);
 
 beforeAll(async () => {
   await driver.init(config);
-  await driver.sleep(3000);
+  await driver.sleep(50000);
 });
 
 afterEach(async () => {
   await driver.sleep(3000);
+  await driver.resetApp();
+  await driver.sleep(3000);
+});
+
+afterAll(async () => {
   await driver.closeApp();
-  await driver.sleep(3000);
-  await driver.launchApp();
-  await driver.sleep(3000);
 });
 
 test('Test Accessibilty Id', async () => {

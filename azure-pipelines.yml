@@ -72,7 +72,7 @@ steps:
 #     echo "Emulator started"
 #   displayName: "Start Android emulator"
   
-- bash: | 
+- bash: |
     echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n android_emulator -k 'system-images;android-29;google_apis;x86' -d 17 --force 
     echo "Emulator created successfully $(ANDROID_HOME/emulator/emulator -list-avds), launching it" 
     nohup $ANDROID_HOME/emulator/emulator -avd android_emulator -skin 1080x1920 -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 & 

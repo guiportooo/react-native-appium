@@ -50,10 +50,14 @@ steps:
     gradleWrapperFile: 'android/gradlew'
     workingDirectory: 'android'
     options: '-PversionName=1.0 -PversionCode=$(Build.BuildId)'
-    tasks: 'assembleRelease'
+    tasks: 'assembleDebug'
     publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
+    
+- script:|
+    ls android/app/build/outputs/apk/debug
+  displayName: 'Listar apks'
 
 # - script: |
 #     echo "Starting emulator"

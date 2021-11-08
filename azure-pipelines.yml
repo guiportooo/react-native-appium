@@ -55,9 +55,9 @@ steps:
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
     
-- script:|
+- script: |
     ls android/app/build/outputs/apk/debug
-  displayName: 'Listar apks'
+  displayName: "Listar apks"
 
 # - script: |
 #     echo "Starting emulator"

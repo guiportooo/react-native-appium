@@ -29,10 +29,20 @@ afterAll(async () => {
 });
 
 test('Test Accessibilty Id', async () => {
+  const screenshot = await driver.takeScreenshot();
+  require('fs').writeFile(
+    '__tests__/e2e/acessibilityId.png',
+    screenshot,
+    'base64',
+  );
+
   expect(await driver.hasElementByAccessibilityId('title')).toBe(true);
 });
 
 test('Add tasks', async () => {
+  const screenshot = await driver.takeScreenshot();
+  require('fs').writeFile('__tests__/e2e/addTasks.png', screenshot, 'base64');
+
   const task1 = 'Task 1';
   const task2 = 'Task 2';
 
@@ -54,6 +64,13 @@ test('Add tasks', async () => {
 });
 
 test('Complete task', async () => {
+  const screenshot = await driver.takeScreenshot();
+  require('fs').writeFile(
+    '__tests__/e2e/completeTask.png',
+    screenshot,
+    'base64',
+  );
+
   const task1 = 'Task 1';
   const task2 = 'Task 2';
 

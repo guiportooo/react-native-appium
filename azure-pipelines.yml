@@ -1,121 +1,107 @@
 trigger:
-- none
+  - none
 
 pool:
   vmImage: 'macOS-latest'
 
 steps:
-# - task: Cache@2
-#   inputs:
-#     key: 'AVD_IMAGES_29'
-#     path: '$(ANDROID_HOME)/system-images'
-#     cacheHitVar: 'AVD_IMAGES_RESTORED'
-#   continueOnError: true
-#   condition: succeededOrFailed()
-#   displayName: 'Caching System Images for AVD'
+  # - task: Cache@2
+  #   inputs:
+  #     key: 'AVD_IMAGES_29'
+  #     path: '$(ANDROID_HOME)/system-images'
+  #     cacheHitVar: 'AVD_IMAGES_RESTORED'
+  #   continueOnError: true
+  #   condition: succeededOrFailed()
+  #   displayName: 'Caching System Images for AVD'
 
-# - script: |
-#     echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install "system-images;android-29;google_apis;x86"
-#     echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd --force --name emu --device "Nexus 5X" -k 'system-images;android-29;google_apis;x86'
-#     $ANDROID_HOME/emulator/emulator -list-avds
-#   condition: ne(variables.AVD_IMAGES_RESTORED, 'true')
-#   displayName: 'Download Android Emulator Image'
+  # - script: |
+  #     echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install "system-images;android-29;google_apis;x86"
+  #     echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd --force --name emu --device "Nexus 5X" -k 'system-images;android-29;google_apis;x86'
+  #     $ANDROID_HOME/emulator/emulator -list-avds
+  #   condition: ne(variables.AVD_IMAGES_RESTORED, 'true')
+  #   displayName: 'Download Android Emulator Image'
 
-- script: yarn install
-  displayName: 'Install packages'
+  - script: yarn install
+    displayName: 'Install packages'
 
-- task: Gradle@2
-  displayName: 'Roda Android clean'
-  inputs:
-    gradleWrapperFile: 'android/gradlew'
-    workingDirectory: 'android'
-    tasks: 'clean'
-    publishJUnitResults: false
-    javaHomeOption: 'JDKVersion'
-    sonarQubeRunAnalysis: false
+  - task: Gradle@2
+    displayName: 'Roda Android clean'
+    inputs:
+      gradleWrapperFile: 'android/gradlew'
+      workingDirectory: 'android'
+      tasks: 'clean'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      sonarQubeRunAnalysis: false
 
-- task: Gradle@2
-  displayName: 'Run Android clean build cache'
-  inputs:
-    gradleWrapperFile: 'android/gradlew'
-    workingDirectory: 'android'
-    tasks: 'cleanBuildCache'
-    publishJUnitResults: false
-    javaHomeOption: 'JDKVersion'
-    sonarQubeRunAnalysis: false
+  - task: Gradle@2
+    displayName: 'Run Android clean build cache'
+    inputs:
+      gradleWrapperFile: 'android/gradlew'
+      workingDirectory: 'android'
+      tasks: 'cleanBuildCache'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      sonarQubeRunAnalysis: false
 
-- task: Gradle@2
-  displayName: 'Run Android assemble'
-  inputs:
-    gradleWrapperFile: 'android/gradlew'
-    workingDirectory: 'android'
-    options: '-PversionName=1.0 -PversionCode=$(Build.BuildId)'
-    tasks: 'assembleDebug'
-    publishJUnitResults: false
-    javaHomeOption: 'JDKVersion'
-    sonarQubeRunAnalysis: false
-    
-- script: |
-    ls android/app/build/outputs/apk/debug
-  displayName: "Listar apks"
+  - task: Gradle@2
+    displayName: 'Run Android assemble'
+    inputs:
+      gradleWrapperFile: 'android/gradlew'
+      workingDirectory: 'android'
+      options: '-PversionName=1.0 -PversionCode=$(Build.BuildId)'
+      tasks: 'assembleDebug'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      sonarQubeRunAnalysis: false
 
-# - script: |
-#     echo "Starting emulator"
-#     nohup $ANDROID_HOME/emulator/emulator -avd emu -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 &
-#     $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-#     $ANDROID_HOME/platform-tools/adb devices
-#     echo "Emulator started"
-#   displayName: 'Android Emulator'
-# - script: |
-#     echo "Starting emulator"
-#     $ANDROID_HOME/platform-tools/adb devices
-#     echo '---'
-#     nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-#     echo '---'
-#     $ANDROID_HOME/platform-tools/adb devices
-#     echo "Emulator started"
-#   displayName: "Start Android emulator"
-  
-# - bash: |
-#     echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n android_emulator -k 'system-images;android-29;google_apis;x86' -d 17 --force 
-#     echo "Emulator created successfully $(ANDROID_HOME/emulator/emulator -list-avds), launching it" 
-#     nohup $ANDROID_HOME/emulator/emulator -avd android_emulator -skin 1080x1920 -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 & 
-#     $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done' 
-#     $ANDROID_HOME/platform-tools/adb devices echo "Emulator started" 
-#   displayName: 'Create and start emulator'
+  - script: |
+      ls android/app/build/outputs/apk/debug
+    displayName: 'Listar apks'
 
-- bash: |
-    $ANDROID_HOME/tools/bin/sdkmanager --list
-  displayName: 'list already installed Android packages'
+  - bash: |
+      $ANDROID_HOME/tools/bin/sdkmanager --list
+    displayName: 'list already installed Android packages'
 
-- bash: |
-    echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-30;google_apis;x86'
-  displayName: 'install Android image'
+  - bash: |
+      echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-30;google_apis;x86'
+    displayName: 'install Android image'
 
-- script: |
-    $ANDROID_HOME/emulator/emulator -list-avds
-    echo '---'
-    echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-30;google_apis;x86' --force
-    echo '---'
-    $ANDROID_HOME/emulator/emulator -list-avds
-  displayName: 'create AVD'
+  - script: |
+      $ANDROID_HOME/emulator/emulator -list-avds
+      echo '---'
+      echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-30;google_apis;x86' --force
+      echo '---'
+      $ANDROID_HOME/emulator/emulator -list-avds
+    displayName: 'create AVD'
 
-- script: |
-    $ANDROID_HOME/platform-tools/adb devices
-    echo '---'
-    nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-    echo '---'
-    $ANDROID_HOME/platform-tools/adb devices
-  displayName: 'start Android emulator'
+  - script: |
+      $ANDROID_HOME/platform-tools/adb devices
+      echo '---'
+      nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+      echo '---'
+      $ANDROID_HOME/platform-tools/adb devices
+    displayName: 'start Android emulator'
 
-- script: |
-    node -v
-    npm install -g appium
-    appium -v
-  displayName: "Install Appium"
-  
-- script: appium & yarn run e2e
-  displayName: "Run Appium and tests"
+  - script: |
+      node -v
+      npm install -g appium
+      appium -v
+    displayName: 'Install Appium'
 
-# - script: yarn run e2e
-#   displayName: 'Appium test'
+  - script: appium & yarn run e2e
+    displayName: 'Run Appium and tests'
+    continueOnError: true
+
+  - task: CopyFiles@2
+    displayName: 'Copia arquivos'
+    inputs:
+      sourceFolder: '__tests__'
+      targetFolder: '$(build.artifactStagingDirectory)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publica os artefatos do Android'
+    inputs:
+      pathToPublish: '$(build.artifactStagingDirectory)'
+      artifactName: '__tests__'
+      publishLocation: 'Container'

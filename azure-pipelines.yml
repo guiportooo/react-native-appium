@@ -110,8 +110,8 @@ steps:
     appium -v
   displayName: "Install Appium"
   
-- script: appium
-  displayName: "Run Appium"
+- script: appium & yarn run e2e
+  displayName: "Run Appium and tests"
 
-- script: yarn run e2e
-  displayName: 'Appium test'
+# - script: yarn run e2e
+#   displayName: 'Appium test'

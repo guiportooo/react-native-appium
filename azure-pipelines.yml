@@ -89,19 +89,19 @@ steps:
       appium -v
     displayName: 'Install Appium'
 
-  - script: appium & yarn run e2e
+  - script: appium & yarn run e2e --screenshots=$(build.artifactStagingDirectory)
     displayName: 'Run Appium and tests'
     continueOnError: true
 
-  - task: CopyFiles@2
-    displayName: 'Copia arquivos'
-    inputs:
-      sourceFolder: '__tests__'
-      targetFolder: '$(build.artifactStagingDirectory)'
+  # - task: CopyFiles@2
+  #   displayName: 'Copia arquivos'
+  #   inputs:
+  #     sourceFolder: '__tests__'
+  #     targetFolder: '$(build.artifactStagingDirectory)'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publica os artefatos do Android'
     inputs:
       pathToPublish: '$(build.artifactStagingDirectory)'
-      artifactName: '__tests__'
+      artifactName: 'screenshots'
       publishLocation: 'Container'

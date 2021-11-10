@@ -2,6 +2,13 @@ import wd from 'wd';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
 const PORT = 4723;
+const screenshotsArg = process.argv.find(arg =>
+  arg.startsWith('--screenshots'),
+);
+const screenshotsLocation = screenshotsArg
+  ? screenshotsArg.split('=')[1]
+  : '__tests__/e2e';
+console.log('screenshotsLocation', screenshotsLocation);
 
 const config = {
   platformName: 'Android',
@@ -31,9 +38,14 @@ afterAll(async () => {
 test('Test Accessibilty Id', async () => {
   const screenshot = await driver.takeScreenshot();
   require('fs').writeFile(
-    '__tests__/e2e/acessibilityId.png',
+    `${screenshotsLocation}/acessibilityId.png`,
     screenshot,
     'base64',
+    err => {
+      if (err) {
+        console.log(err);
+      }
+    },
   );
 
   expect(await driver.hasElementByAccessibilityId('title')).toBe(true);
@@ -41,7 +53,16 @@ test('Test Accessibilty Id', async () => {
 
 test('Add tasks', async () => {
   const screenshot = await driver.takeScreenshot();
-  require('fs').writeFile('__tests__/e2e/addTasks.png', screenshot, 'base64');
+  require('fs').writeFile(
+    `${screenshotsLocation}/addTasks.png`,
+    screenshot,
+    'base64',
+    err => {
+      if (err) {
+        console.log(err);
+      }
+    },
+  );
 
   const task1 = 'Task 1';
   const task2 = 'Task 2';
@@ -66,9 +87,14 @@ test('Add tasks', async () => {
 test('Complete task', async () => {
   const screenshot = await driver.takeScreenshot();
   require('fs').writeFile(
-    '__tests__/e2e/completeTask.png',
+    `${screenshotsLocation}/completeTask.png`,
     screenshot,
     'base64',
+    err => {
+      if (err) {
+        console.log(err);
+      }
+    },
   );
 
   const task1 = 'Task 1';

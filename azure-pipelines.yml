@@ -89,6 +89,9 @@ steps:
       appium -v
     displayName: 'Install Appium'
 
+  - script: yarn start --reset-cache
+    displayName: 'Start Metro'
+
   - script: appium & yarn run e2e --screenshots=$(build.artifactStagingDirectory)
     displayName: 'Run Appium and tests'
     continueOnError: true

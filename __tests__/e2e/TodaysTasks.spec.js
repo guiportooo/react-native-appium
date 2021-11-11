@@ -25,10 +25,13 @@ beforeAll(async () => {
   await driver.sleep(50000);
 });
 
+beforeEach(async () => {
+  await driver.sleep(50000);
+});
+
 afterEach(async () => {
-  await driver.sleep(3000);
+  await driver.sleep(6000);
   await driver.resetApp();
-  await driver.sleep(3000);
 });
 
 afterAll(async () => {

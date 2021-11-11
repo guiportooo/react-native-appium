@@ -13,6 +13,9 @@ steps:
   #   continueOnError: true
   #   condition: succeededOrFailed()
   #   displayName: 'Caching System Images for AVD'
+  - script: npm install -g pm2
+    displayName: 'Install pm2'
+
   - script: yarn install
     displayName: 'Install packages'
 
@@ -81,31 +84,19 @@ steps:
       appium -v
     displayName: 'Install Appium'
 
-  - task: Bash@3
-    inputs:
-      targetType: 'inline'
-      script: |
-        chmod u+x ./metro-start.sh
-        ./metro-start.sh
-        exit
-      failOnStderr: true
-      workingDirectory: '$(System.DefaultWorkingDirectory)/__tests__/e2e/'
-    displayName: 'Start Metro'
-
-  - task: Bash@3
-    inputs:
-      targetType: 'inline'
-      script: |
-        chmod u+x ./appium-start.sh
-        ./appium-start.sh
-        exit
-      failOnStderr: true
-      workingDirectory: '$(System.DefaultWorkingDirectory)/__tests__/e2e/'
-    displayName: 'Run Appium'
+  - script: |
+      pm2 start --name metro --interpreter bash yarn -- start
+      pm2 start --name appium appium
+    displayName: 'Start Metro and Appium'
 
   - script: yarn run e2e --screenshots=$(build.artifactStagingDirectory)
-    displayName: 'Run tests'
     continueOnError: true
+    displayName: 'Run tests'
+
+  - script: |
+      pm2 stop metro
+      pm2 stop appium
+    displayName: 'Stop Metro and Appium'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publica os artefatos do Android'

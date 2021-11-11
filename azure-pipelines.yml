@@ -13,14 +13,6 @@ steps:
   #   continueOnError: true
   #   condition: succeededOrFailed()
   #   displayName: 'Caching System Images for AVD'
-
-  # - script: |
-  #     echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install "system-images;android-29;google_apis;x86"
-  #     echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd --force --name emu --device "Nexus 5X" -k 'system-images;android-29;google_apis;x86'
-  #     $ANDROID_HOME/emulator/emulator -list-avds
-  #   condition: ne(variables.AVD_IMAGES_RESTORED, 'true')
-  #   displayName: 'Download Android Emulator Image'
-
   - script: yarn install
     displayName: 'Install packages'
 
@@ -89,18 +81,31 @@ steps:
       appium -v
     displayName: 'Install Appium'
 
-  - script: yarn start --reset-cache
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        chmod u+x ./metro-start.sh
+        ./metro-start.sh
+        exit
+      failOnStderr: true
+      workingDirectory: '$(System.DefaultWorkingDirectory)/__tests__/e2e/'
     displayName: 'Start Metro'
 
-  - script: appium & yarn run e2e --screenshots=$(build.artifactStagingDirectory)
-    displayName: 'Run Appium and tests'
-    continueOnError: true
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        chmod u+x ./appium-start.sh
+        ./appium-start.sh
+        exit
+      failOnStderr: true
+      workingDirectory: '$(System.DefaultWorkingDirectory)/__tests__/e2e/'
+    displayName: 'Run Appium'
 
-  # - task: CopyFiles@2
-  #   displayName: 'Copia arquivos'
-  #   inputs:
-  #     sourceFolder: '__tests__'
-  #     targetFolder: '$(build.artifactStagingDirectory)'
+  - script: yarn run e2e --screenshots=$(build.artifactStagingDirectory)
+    displayName: 'Run tests'
+    continueOnError: true
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publica os artefatos do Android'

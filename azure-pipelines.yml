@@ -45,13 +45,13 @@ steps:
       gradleWrapperFile: 'android/gradlew'
       workingDirectory: 'android'
       options: '-PversionName=1.0 -PversionCode=$(Build.BuildId)'
-      tasks: 'assembleDebug'
+      tasks: 'assembleRelease'
       publishJUnitResults: false
       javaHomeOption: 'JDKVersion'
       sonarQubeRunAnalysis: false
 
   - script: |
-      ls android/app/build/outputs/apk/debug
+      ls android/app/build/outputs/apk/release
     displayName: 'Listar apks'
 
   - bash: |
@@ -85,7 +85,7 @@ steps:
     displayName: 'Install Appium'
 
   - script: |
-      pm2 start --name metro --interpreter bash yarn -- start
+      pm2 start --name metro --interpreter bash yarn -- start --variant=release
       pm2 start --name appium appium
     displayName: 'Start Metro and Appium'
 

@@ -14,7 +14,7 @@ const config = {
   platformName: 'Android',
   platformVersion: '11',
   deviceName: 'Android Emulator',
-  app: './android/app/build/outputs/apk/debug/app-debug.apk',
+  app: './android/app/build/outputs/apk/release/app-release.apk',
   automationName: 'UiAutomator2',
 };
 
@@ -25,13 +25,10 @@ beforeAll(async () => {
   await driver.sleep(50000);
 });
 
-beforeEach(async () => {
-  await driver.sleep(50000);
-});
-
 afterEach(async () => {
   await driver.sleep(6000);
   await driver.resetApp();
+  await driver.sleep(6000);
 });
 
 afterAll(async () => {

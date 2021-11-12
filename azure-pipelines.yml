@@ -1,0 +1,106 @@
+trigger:
+  - none
+
+pool:
+  vmImage: 'macOS-11'
+
+steps:
+  # - task: Cache@2
+  #   inputs:
+  #     key: 'AVD_IMAGES_29'
+  #     path: '$(ANDROID_HOME)/system-images'
+  #     cacheHitVar: 'AVD_IMAGES_RESTORED'
+  #   continueOnError: true
+  #   condition: succeededOrFailed()
+  #   displayName: 'Caching System Images for AVD'
+  - script: npm install -g pm2
+    displayName: 'Install pm2'
+
+  - script: yarn install
+    displayName: 'Install packages'
+
+  - task: Gradle@2
+    displayName: 'Roda Android clean'
+    inputs:
+      gradleWrapperFile: 'android/gradlew'
+      workingDirectory: 'android'
+      tasks: 'clean'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      sonarQubeRunAnalysis: false
+
+  - task: Gradle@2
+    displayName: 'Run Android clean build cache'
+    inputs:
+      gradleWrapperFile: 'android/gradlew'
+      workingDirectory: 'android'
+      tasks: 'cleanBuildCache'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      sonarQubeRunAnalysis: false
+
+  - task: Gradle@2
+    displayName: 'Run Android assemble'
+    inputs:
+      gradleWrapperFile: 'android/gradlew'
+      workingDirectory: 'android'
+      options: '-PversionName=1.0 -PversionCode=$(Build.BuildId)'
+      tasks: 'assembleRelease'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      sonarQubeRunAnalysis: false
+
+  - script: |
+      ls android/app/build/outputs/apk/release
+    displayName: 'Listar apks'
+
+  - bash: |
+      $ANDROID_HOME/tools/bin/sdkmanager --list
+    displayName: 'list already installed Android packages'
+
+  - bash: |
+      echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-30;google_apis;x86'
+    displayName: 'install Android image'
+
+  - script: |
+      $ANDROID_HOME/emulator/emulator -list-avds
+      echo '---'
+      echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-30;google_apis;x86' --force
+      echo '---'
+      $ANDROID_HOME/emulator/emulator -list-avds
+    displayName: 'create AVD'
+
+  - script: |
+      $ANDROID_HOME/platform-tools/adb devices
+      echo '---'
+      nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+      echo '---'
+      $ANDROID_HOME/platform-tools/adb devices
+    displayName: 'start Android emulator'
+
+  - script: |
+      node -v
+      npm install -g appium
+      appium -v
+    displayName: 'Install Appium'
+
+  - script: |
+      pm2 start --name metro --interpreter bash yarn -- start --variant=release
+      pm2 start --name appium appium
+    displayName: 'Start Metro and Appium'
+
+  - script: yarn run e2e --screenshots=$(build.artifactStagingDirectory)
+    continueOnError: true
+    displayName: 'Run tests'
+
+  - script: |
+      pm2 stop metro
+      pm2 stop appium
+    displayName: 'Stop Metro and Appium'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publica os artefatos do Android'
+    inputs:
+      pathToPublish: '$(build.artifactStagingDirectory)'
+      artifactName: 'screenshots'
+      publishLocation: 'Container'

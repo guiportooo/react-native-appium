@@ -2,12 +2,19 @@ import wd from 'wd';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
 const PORT = 4723;
+const screenshotsArg = process.argv.find(arg =>
+  arg.startsWith('--screenshots'),
+);
+const screenshotsLocation = screenshotsArg
+  ? screenshotsArg.split('=')[1]
+  : '__tests__/e2e';
+console.log('screenshotsLocation', screenshotsLocation);
 
 const config = {
   platformName: 'Android',
   platformVersion: '11',
   deviceName: 'Android Emulator',
-  app: './android/app/build/outputs/apk/debug/app-debug.apk',
+  app: './android/app/build/outputs/apk/release/app-release.apk',
   automationName: 'UiAutomator2',
 };
 
@@ -15,22 +22,48 @@ const driver = wd.promiseChainRemote('localhost', PORT);
 
 beforeAll(async () => {
   await driver.init(config);
-  await driver.sleep(3000);
+  await driver.sleep(50000);
 });
 
 afterEach(async () => {
-  await driver.sleep(3000);
+  await driver.sleep(6000);
+  await driver.resetApp();
+  await driver.sleep(6000);
+});
+
+afterAll(async () => {
   await driver.closeApp();
-  await driver.sleep(3000);
-  await driver.launchApp();
-  await driver.sleep(3000);
 });
 
 test('Test Accessibilty Id', async () => {
+  const screenshot = await driver.takeScreenshot();
+  require('fs').writeFile(
+    `${screenshotsLocation}/acessibilityId.png`,
+    screenshot,
+    'base64',
+    err => {
+      if (err) {
+        console.log(err);
+      }
+    },
+  );
+
   expect(await driver.hasElementByAccessibilityId('title')).toBe(true);
 });
 
 test('Add tasks', async () => {
+  const screenshot = await driver.takeScreenshot();
+  require('fs').writeFile(
+    `${screenshotsLocation}/addTasks.png`,
+    screenshot,
+    'base64',
+    err => {
+      if (err) {
+        console.log(err);
+      }
+    },
+  );
+
   const task1 = 'Task 1';
   const task2 = 'Task 2';
 
@@ -52,6 +85,18 @@ test('Add tasks', async () => {
 });
 
 test('Complete task', async () => {
+  const screenshot = await driver.takeScreenshot();
+  require('fs').writeFile(
+    `${screenshotsLocation}/completeTask.png`,
+    screenshot,
+    'base64',
+    err => {
+      if (err) {
+        console.log(err);
+      }
+    },
+  );
+
   const task1 = 'Task 1';
   const task2 = 'Task 2';
 
